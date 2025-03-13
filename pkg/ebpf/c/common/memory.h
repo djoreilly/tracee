@@ -215,7 +215,7 @@ statfunc bool vma_is_vdso(struct vm_area_struct *vma)
 
     // read only 6 characters (7 with NULL terminator), enough to compare with "[vdso]"
     char mapping_name[7];
-    bpf_probe_read_str(&mapping_name, 7, BPF_CORE_READ(special_mapping, name));
+    bpf_probe_read_kernel_str(&mapping_name, 7, BPF_CORE_READ(special_mapping, name));
     return strncmp("[vdso]", mapping_name, 7) == 0;
 }
 

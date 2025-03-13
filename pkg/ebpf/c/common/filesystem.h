@@ -493,17 +493,17 @@ statfunc void fill_file_header(u8 header[FILE_MAGIC_HDR_SIZE], io_data_t io_data
                      "%[size] = %[max_size];\n"
                      :
                      : [size] "r"(len), [max_size] "i"(FILE_MAGIC_HDR_SIZE));
-        bpf_probe_read(header, len, io_data.ptr);
+        bpf_probe_read_user(header, len, io_data.ptr);
     } else {
         struct iovec io_vec;
         __builtin_memset(&io_vec, 0, sizeof(io_vec));
-        bpf_probe_read(&io_vec, sizeof(struct iovec), io_data.ptr);
+        bpf_probe_read_user(&io_vec, sizeof(struct iovec), io_data.ptr);
         // inline bounds check to force compiler to use the register of len
         asm volatile("if %[size] < %[max_size] goto +1;\n"
                      "%[size] = %[max_size];\n"
                      :
                      : [size] "r"(len), [max_size] "i"(FILE_MAGIC_HDR_SIZE));
-        bpf_probe_read(header, len, io_vec.iov_base);
+        bpf_probe_read_user(header, len, io_vec.iov_base);
     }
 }
 

@@ -372,7 +372,7 @@ statfunc struct sockaddr_un get_unix_sock_addr(struct unix_sock *sock)
     struct sockaddr_un sockaddr = {};
     // NOTE(nadav.str): stack allocated, so runtime core size check is avoided
     if (len <= sizeof(struct sockaddr_un)) {
-        bpf_probe_read(&sockaddr, len, addr->name);
+        bpf_probe_read_kernel(&sockaddr, len, addr->name);
     }
     return sockaddr;
 }

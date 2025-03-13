@@ -17,7 +17,7 @@ statfunc struct pipe_inode_info *get_file_pipe_info(struct file *);
 statfunc void *get_symbol_addr(char *symbol_name)
 {
     char new_ksym_name[MAX_KSYM_NAME_SIZE] = {};
-    bpf_probe_read_str(new_ksym_name, MAX_KSYM_NAME_SIZE, symbol_name);
+    bpf_probe_read_kernel_str(new_ksym_name, MAX_KSYM_NAME_SIZE, symbol_name);
     void **sym = bpf_map_lookup_elem(&ksymbols_map, (void *) &new_ksym_name);
 
     if (sym == NULL)

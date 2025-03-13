@@ -380,11 +380,12 @@ int syscall__execve_enter(void *ctx)
     if (!evaluate_scope_filters(&p))
         return 0;
 
-    save_str_to_buf(&p.event->args_buf, (void *) sys->args.args[0] /*filename*/, 0);
-    save_str_arr_to_buf(&p.event->args_buf, (const char *const *) sys->args.args[1] /*argv*/, 1);
+    save_user_str_to_buf(&p.event->args_buf, (void __user *) sys->args.args[0] /*filename*/, 0);
+    save_user_str_arr_to_buf(&p.event->args_buf, (const char __user *const __user *) sys->args.args[1] /*argv*/, 1);
+
     if (p.config->options & OPT_EXEC_ENV) {
-        save_str_arr_to_buf(
-            &p.event->args_buf, (const char *const *) sys->args.args[2] /*envp*/, 2);
+        save_user_str_arr_to_buf(
+            &p.event->args_buf, (const char __user *const __user *) sys->args.args[2] /*envp*/, 2);
     }
 
     return events_perf_submit(&p, 0);
@@ -410,11 +411,11 @@ int syscall__execve_exit(void *ctx)
     if (!evaluate_scope_filters(&p))
         return 0;
 
-    save_str_to_buf(&p.event->args_buf, (void *) sys->args.args[0] /*filename*/, 0);
-    save_str_arr_to_buf(&p.event->args_buf, (const char *const *) sys->args.args[1] /*argv*/, 1);
+    save_user_str_to_buf(&p.event->args_buf, (void __user *) sys->args.args[0] /*filename*/, 0);
+    save_user_str_arr_to_buf(&p.event->args_buf, (const char __user *const __user *) sys->args.args[1] /*argv*/, 1);
     if (p.config->options & OPT_EXEC_ENV) {
-        save_str_arr_to_buf(
-            &p.event->args_buf, (const char *const *) sys->args.args[2] /*envp*/, 2);
+        save_user_str_arr_to_buf(
+            &p.event->args_buf, (const char __user *const __user *) sys->args.args[2] /*envp*/, 2);
     }
 
     return events_perf_submit(&p, sys->ret);
@@ -439,11 +440,11 @@ int syscall__execveat_enter(void *ctx)
         return 0;
 
     save_to_submit_buf(&p.event->args_buf, (void *) &sys->args.args[0] /*dirfd*/, sizeof(int), 0);
-    save_str_to_buf(&p.event->args_buf, (void *) sys->args.args[1] /*pathname*/, 1);
-    save_str_arr_to_buf(&p.event->args_buf, (const char *const *) sys->args.args[2] /*argv*/, 2);
+    save_user_str_to_buf(&p.event->args_buf, (void __user *) sys->args.args[1] /*pathname*/, 1);
+    save_user_str_arr_to_buf(&p.event->args_buf, (const char __user *const __user *) sys->args.args[2] /*argv*/, 2);
     if (p.config->options & OPT_EXEC_ENV) {
-        save_str_arr_to_buf(
-            &p.event->args_buf, (const char *const *) sys->args.args[3] /*envp*/, 3);
+        save_user_str_arr_to_buf(
+            &p.event->args_buf, (const char __user *const __user *) sys->args.args[3] /*envp*/, 3);
     }
     save_to_submit_buf(&p.event->args_buf, (void *) &sys->args.args[4] /*flags*/, sizeof(int), 4);
 
@@ -471,11 +472,11 @@ int syscall__execveat_exit(void *ctx)
         return 0;
 
     save_to_submit_buf(&p.event->args_buf, (void *) &sys->args.args[0] /*dirfd*/, sizeof(int), 0);
-    save_str_to_buf(&p.event->args_buf, (void *) sys->args.args[1] /*pathname*/, 1);
-    save_str_arr_to_buf(&p.event->args_buf, (const char *const *) sys->args.args[2] /*argv*/, 2);
+    save_user_str_to_buf(&p.event->args_buf, (void __user *) sys->args.args[1] /*pathname*/, 1);
+    save_user_str_arr_to_buf(&p.event->args_buf, (const char __user *const __user *) sys->args.args[2] /*argv*/, 2);
     if (p.config->options & OPT_EXEC_ENV) {
-        save_str_arr_to_buf(
-            &p.event->args_buf, (const char *const *) sys->args.args[3] /*envp*/, 3);
+        save_user_str_arr_to_buf(
+            &p.event->args_buf, (const char __user *const __user *) sys->args.args[3] /*envp*/, 3);
     }
     save_to_submit_buf(&p.event->args_buf, (void *) &sys->args.args[4] /*flags*/, sizeof(int), 4);
 
@@ -2272,7 +2273,8 @@ int BPF_KPROBE(trace_security_bprm_check)
     return events_perf_submit(&p, 0);
 }
 
-statfunc bool check_file_ns(struct task_struct *task, struct file *file, void *syscall_pathname)
+statfunc bool check_file_ns(struct task_struct *task, struct file *file,
+                            void __user * syscall_pathname)
 {
     struct path path = get_path_from_file(file);
     struct mount *mount = real_mount(path.mnt);
@@ -2286,7 +2288,7 @@ statfunc bool check_file_ns(struct task_struct *task, struct file *file, void *s
     struct task_struct *pid_ns_leader = BPF_CORE_READ(pid_ns, child_reaper);
 
     char unresolved_path[7] = {0};
-    bpf_probe_read_str(unresolved_path, 7, syscall_pathname);
+    bpf_probe_read_user_str(unresolved_path, 7, syscall_pathname);
     if (file_mnt_ns == get_task_mnt_ns_id(pid_ns_leader) &&
         strncmp(unresolved_path, "/proc/", 6) == 0)
         return false;
@@ -2335,7 +2337,7 @@ int BPF_KPROBE(trace_security_file_open)
 
     // Load the arguments given to the open syscall (which eventually invokes this function)
     char empty_string[1] = "";
-    void *syscall_pathname = &empty_string;
+    void __user *syscall_pathname = NULL;
     struct pt_regs *task_regs = get_current_task_pt_regs();
 
     switch (p.event->context.syscall) {
@@ -2351,14 +2353,15 @@ int BPF_KPROBE(trace_security_file_open)
             break;
     }
 
-    if (evaluate_scope_filters(&p) && check_file_ns(p.event->task, file, syscall_pathname)) {
+    if (syscall_pathname && evaluate_scope_filters(&p) &&
+        check_file_ns(p.event->task, file, syscall_pathname)) {
         struct path path = get_path_from_file(file);
         struct mount *mount = real_mount(path.mnt);
         u32 file_mnt_ns = BPF_CORE_READ(mount, mnt_ns, ns.inum);
 
         save_str_to_buf(&p.event->args_buf, file_path, 0);
         save_to_submit_buf(&p.event->args_buf, &flags, sizeof(flags), 1);
-        save_str_to_buf(&p.event->args_buf, syscall_pathname, 2);
+        save_user_str_to_buf(&p.event->args_buf, syscall_pathname, 2);
         save_to_submit_buf(&p.event->args_buf, &file_mnt_ns, sizeof(file_mnt_ns), 3);
 
         events_perf_submit(&p, 0);
@@ -2368,7 +2371,10 @@ int BPF_KPROBE(trace_security_file_open)
         check_file_mount(file)) {
         save_str_to_buf(&p.event->args_buf, file_path, 0);
         save_to_submit_buf(&p.event->args_buf, &flags, sizeof(flags), 1);
-        save_str_to_buf(&p.event->args_buf, syscall_pathname, 2);
+        if (syscall_pathname)
+                save_user_str_to_buf(&p.event->args_buf, syscall_pathname, 2);
+        else
+                save_str_to_buf(&p.event->args_buf, &empty_string, 2);
 
         struct path path = get_path_from_file(file);
         struct mount *mount = real_mount(path.mnt);
@@ -2405,7 +2411,10 @@ int BPF_KPROBE(trace_security_file_open)
     save_to_submit_buf(&p.event->args_buf, &s_dev, sizeof(dev_t), 2);
     save_to_submit_buf(&p.event->args_buf, &inode_nr, sizeof(unsigned long), 3);
     save_to_submit_buf(&p.event->args_buf, &ctime, sizeof(u64), 4);
-    save_str_to_buf(&p.event->args_buf, syscall_pathname, 5);
+    if (syscall_pathname)
+            save_user_str_to_buf(&p.event->args_buf, syscall_pathname, 5);
+    else
+            save_str_to_buf(&p.event->args_buf, empty_string, 5);
 
     if (!evaluate_data_filters(&p, 0))
         return 0;
@@ -2860,7 +2869,7 @@ int BPF_KPROBE(trace_security_socket_connect)
     if (need_workaround) {
         // Workaround for sockaddr_un struct length (issue: #1129).
         struct sockaddr_un sockaddr = {0};
-        bpf_probe_read(&sockaddr, (u32) addr_len, (void *) address);
+        bpf_probe_read_kernel(&sockaddr, (u32) addr_len, (void *) address);
         // NOTE(nadav.str): stack allocated, so runtime core size check is avoided
         stsb(args_buf, (void *) &sockaddr, sizeof(struct sockaddr_un), 2);
     }
@@ -2994,7 +3003,7 @@ int BPF_KPROBE(trace_security_socket_bind)
         if (addr_len <= sizeof(struct sockaddr_un)) {
             struct sockaddr_un sockaddr = {};
             // NOTE(nadav.str): stack allocated, so runtime core size check is avoided
-            bpf_probe_read(&sockaddr, addr_len, (void *) address);
+            bpf_probe_read_kernel(&sockaddr, addr_len, (void *) address);
             save_to_submit_buf(
                 &p.event->args_buf, (void *) &sockaddr, sizeof(struct sockaddr_un), 1);
         } else
@@ -3096,7 +3105,7 @@ statfunc u32 send_bin_helper(void *ctx, void *prog_array, int tail_call)
             // Handle the rest of write recursively
             bin_args->start_off += bin_args->full_size;
             struct iovec io_vec;
-            bpf_probe_read(&io_vec, sizeof(struct iovec), &bin_args->vec[bin_args->iov_idx]);
+            bpf_probe_read_kernel(&io_vec, sizeof(struct iovec), &bin_args->vec[bin_args->iov_idx]);
             bin_args->ptr = io_vec.iov_base;
             bin_args->full_size = io_vec.iov_len;
             bpf_tail_call(ctx, prog_array, tail_call);
@@ -3182,7 +3191,7 @@ statfunc u32 send_bin_helper(void *ctx, void *prog_array, int tail_call)
         // Handle the rest of write recursively
         bin_args->start_off += bin_args->full_size;
         struct iovec io_vec;
-        bpf_probe_read(&io_vec, sizeof(struct iovec), &bin_args->vec[bin_args->iov_idx]);
+        bpf_probe_read_kernel(&io_vec, sizeof(struct iovec), &bin_args->vec[bin_args->iov_idx]);
         bin_args->ptr = io_vec.iov_base;
         bin_args->full_size = io_vec.iov_len;
         bpf_tail_call(ctx, prog_array, tail_call);
@@ -5246,7 +5255,7 @@ int BPF_KPROBE(trace_execute_finished)
         envp = get_syscall_arg3(p.event->task, task_regs, false);
     }
 
-    save_str_to_buf(&p.event->args_buf, path, 2);
+    save_user_str_to_buf(&p.event->args_buf, path, 2);
     save_str_arr_to_buf(&p.event->args_buf, (const char *const *) argv, 12);
     if (p.config->options & OPT_EXEC_ENV) {
         save_str_arr_to_buf(&p.event->args_buf, (const char *const *) envp, 13);
