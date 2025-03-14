@@ -6485,9 +6485,9 @@ statfunc u32 cgroup_skb_generic(struct __sk_buff *ctx, void *cgrpctxmap)
                 return 1;
 
             ihl = nethdrs->iphdrs.iphdr.ihl;
-            if (ihl > 5) { // re-read IPv4 header if needed
-                size -= bpf_core_type_size(struct iphdr);
-                size += ihl * 4;
+            if (ihl * 4 >= size) { // re-read IPv4 header if needed
+                size = ihl * 4;
+
                 bpf_skb_load_bytes_relative(ctx, 0, dest, size, 1);
             }
 
