@@ -10,7 +10,10 @@ var (
 	// from asm-generic/fcntl.h
 	// NOT sequential values
 	// gap
+	O_DIRECT    = SystemFunctionArgument{rawValue: 00040000, stringValue: "O_DIRECT"}
 	O_LARGEFILE = SystemFunctionArgument{rawValue: 00100000, stringValue: "O_LARGEFILE"}
+	O_DIRECTORY = SystemFunctionArgument{rawValue: 00200000, stringValue: "O_DIRECTORY"}
+	O_NOFOLLOW  = SystemFunctionArgument{rawValue: 00400000, stringValue: "O_NOFOLLOW"}
 )
 
 var openFlagsValues = []SystemFunctionArgument{
