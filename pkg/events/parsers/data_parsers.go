@@ -733,6 +733,8 @@ var (
 	PTRACE_SECCOMP_GET_METADATA   = SystemFunctionArgument{rawValue: 0x420d, stringValue: "PTRACE_SECCOMP_GET_METADATA"}
 	PTRACE_GET_SYSCALL_INFO       = SystemFunctionArgument{rawValue: 0x420e, stringValue: "PTRACE_GET_SYSCALL_INFO"}
 	PTRACE_GET_RSEQ_CONFIGURATION = SystemFunctionArgument{rawValue: 0x420f, stringValue: "PTRACE_GET_RSEQ_CONFIGURATION"}
+	PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG = SystemFunctionArgument{rawValue: 0x4210, stringValue: "PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG"}
+	PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG = SystemFunctionArgument{rawValue: 0x4211, stringValue: "PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG"}
 )
 
 func ParsePtraceRequestArgument(request uint64) (string, error) {

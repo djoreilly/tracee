@@ -57,9 +57,6 @@ var (
 	PTRACE_ARCH_PRCTL = SystemFunctionArgument{rawValue: 30, stringValue: "PTRACE_ARCH_PRCTL"}
 	// gap
 	PTRACE_SINGLEBLOCK = SystemFunctionArgument{rawValue: 33, stringValue: "PTRACE_SINGLEBLOCK"}
-	// gap
-	PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG = SystemFunctionArgument{rawValue: 0x4210, stringValue: "PTRACE_SET_SYSCALL_USER_DISPATCH_CONFIG"}
-	PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG = SystemFunctionArgument{rawValue: 0x4211, stringValue: "PTRACE_GET_SYSCALL_USER_DISPATCH_CONFIG"}
 )
 
 var ptraceRequestValues = []SystemFunctionArgument{
