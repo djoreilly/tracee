@@ -2867,7 +2867,7 @@ int BPF_KPROBE(trace_security_socket_connect)
             break;
     }
 
-#if defined(bpf_target_x86)
+#if !defined(bpf_target_arm64)
     if (need_workaround) {
         // Workaround for sockaddr_un struct length (issue: #1129).
         struct sockaddr_un sockaddr = {0};
@@ -2948,7 +2948,7 @@ int BPF_KPROBE(trace_security_socket_bind)
     struct sock *sk = get_socket_sock(sock);
 
     struct sockaddr *address = (struct sockaddr *) PT_REGS_PARM2(ctx);
-#if defined(__TARGET_ARCH_x86) // TODO: issue: #1129
+#if !defined(bpf_target_arm64) // TODO: issue: #1129
     uint addr_len = (uint) PT_REGS_PARM3(ctx);
 #endif
 
@@ -3001,7 +3001,7 @@ int BPF_KPROBE(trace_security_socket_bind)
             connect_id.port = BPF_CORE_READ(addr, sin6_port);
         }
     } else if (sa_fam == AF_UNIX) {
-#if defined(__TARGET_ARCH_x86) // TODO: this is broken in arm64 (issue: #1129)
+#if !defined(bpf_target_arm64) // TODO: this is broken in arm64 (issue: #1129)
         if (addr_len <= sizeof(struct sockaddr_un)) {
             struct sockaddr_un sockaddr = {};
             // NOTE(nadav.str): stack allocated, so runtime core size check is avoided
