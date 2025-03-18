@@ -2765,7 +2765,7 @@ int BPF_KPROBE(trace_security_socket_listen)
         case SYSCALL_LISTEN:
             save_to_submit_buf(&p.event->args_buf, (void *) &sys->args.args[0], sizeof(u32), 0);
             break;
-#if defined(bpf_target_x86) // armhf makes use of SYSCALL_LISTEN
+#ifdef ARCH_HAS_SOCKETCALL
         case SYSCALL_SOCKETCALL:
             save_to_submit_buf(&p.event->args_buf, (void *) sys->args.args[1], sizeof(u32), 0);
             break;
@@ -2835,12 +2835,14 @@ int BPF_KPROBE(trace_security_socket_connect)
             sockfd = get_syscall_arg1(p.event->task, task_regs, false);
             stsb(args_buf, &sockfd, sizeof(int), 0);
             break;
+#ifdef ARCH_HAS_SOCKETCALL
         case SYSCALL_SOCKETCALL:
             arr_addr = (void *) get_syscall_arg2(p.event->task, task_regs, false);
             // fd is the first entry in the array
             bpf_probe_read_user(&sockfd, sizeof(int), arr_addr);
             stsb(args_buf, &sockfd, sizeof(int), 0);
             break;
+#endif
     }
 
     // Save the socket type argument to the event.
@@ -2917,7 +2919,7 @@ int BPF_KPROBE(trace_security_socket_accept)
             sockfd = get_syscall_arg1(p.event->task, task_regs, false);
             save_to_submit_buf(&p.event->args_buf, (void *) &sockfd, sizeof(int), 0);
             break;
-#if defined(bpf_target_x86) // armhf makes use of SYSCALL_ACCEPT/4
+#ifdef ARCH_HAS_SOCKETCALL
         case SYSCALL_SOCKETCALL:
             sockfd = get_syscall_arg2(p.event->task, task_regs, false);
             save_to_submit_buf(&p.event->args_buf, (void *) &sockfd, sizeof(int), 0);
@@ -2963,7 +2965,7 @@ int BPF_KPROBE(trace_security_socket_bind)
             sockfd = get_syscall_arg1(p.event->task, task_regs, false);
             save_to_submit_buf(&p.event->args_buf, (void *) &sockfd, sizeof(u32), 0);
             break;
-#if defined(bpf_target_x86) // armhf makes use of SYSCALL_BIND
+#ifdef ARCH_HAS_SOCKETCALL
         case SYSCALL_SOCKETCALL:
             sockfd_addr = get_syscall_arg2(p.event->task, task_regs, false);
             save_to_submit_buf(&p.event->args_buf, (void *) sockfd_addr, sizeof(u32), 0);
@@ -3037,7 +3039,7 @@ int BPF_KPROBE(trace_security_socket_setsockopt)
             sockfd = get_syscall_arg1(p.event->task, task_regs, false);
             save_to_submit_buf(&p.event->args_buf, (void *) &sockfd, sizeof(u32), 0);
             break;
-#if defined(bpf_target_x86) // armhf makes use of SYSCALL_SETSOCKOPT
+#ifdef ARCH_HAS_SOCKETCALL
         case SYSCALL_SOCKETCALL:
             sockfd_addr = get_syscall_arg2(p.event->task, task_regs, false);
             save_to_submit_buf(&p.event->args_buf, (void *) sockfd_addr, sizeof(u32), 0);

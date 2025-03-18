@@ -313,6 +313,10 @@ statfunc struct pt_regs *get_current_task_pt_regs(void)
     #define SYSCALL_ARCH_PRCTL             UNDEFINED_SYSCALL
 #endif
 
+#if SYSCALL_SOCKETCALL != UNDEFINED_SYSCALL
+#define ARCH_HAS_SOCKETCALL 1
+#endif
+
 statfunc bool has_syscall_fd_arg(uint syscall_id)
 {
     // Only syscalls with one fd argument so far
