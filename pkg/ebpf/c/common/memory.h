@@ -176,7 +176,8 @@ statfunc bool vma_is_anon(struct vm_area_struct *vma)
 // The golang heap consists of arenas which are memory regions mapped using mmap.
 // When allocating areans, golang supplies mmap with an address hint, which is an
 // address that the kernel should place the mapping at.
-// Hints for x86_64 begin at 0xc000000000 and for ARM64 at 0x4000000000.
+// Hints for ARM64 begin at 0x4000000000 and at 0xc000000000 for other architectures
+// (or if -race is enabled)
 // From observation, when allocating arenas the MAP_FIXED flag is used which forces
 // the kernel to use the specified address or fail the mapping, so it is safe to
 // rely on the address pattern to determine if it belongs to a heap arena.
@@ -191,7 +192,7 @@ statfunc bool vma_is_anon(struct vm_area_struct *vma)
 // We define a max hint that we assume golang allocations will never exceed.
 // This translates to the address 0xff00000000.
 // This means that we assume that a golang program will never allocate more than
-// 256GB of memory on x86_64, or 768GB on ARM64.
+// 256GB of memory on most architectures, or 768GB on ARM64.
 #define GOLANG_ARENA_HINT_MAX (0xffUL << 32)
 
 statfunc bool vma_is_golang_heap(struct vm_area_struct *vma)
