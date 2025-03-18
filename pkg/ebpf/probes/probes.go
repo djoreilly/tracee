@@ -147,6 +147,10 @@ const (
 	ExecuteAtFinishedARM
 	ExecuteFinishedCompatARM
 	ExecuteAtFinishedCompatARM
+	ExecuteFinishedS390
+	ExecuteAtFinishedS390
+	ExecuteFinishedCompatS390
+	ExecuteAtFinishedCompatS390
 	ExecuteFinishedGeneric
 	ExecuteAtFinishedGeneric
 	ExecuteFinishedCompatGeneric

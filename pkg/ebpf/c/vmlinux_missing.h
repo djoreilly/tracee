@@ -144,6 +144,15 @@ enum perf_type_id
 #define THREAD_SHIFT		15
 #define THREAD_SIZE		(_UL(1) << THREAD_SHIFT)
 
+#elif defined(__TARGET_ARCH_s390)
+#define _TIF_31BIT           (1 << 16)
+
+#define PAGE_SHIFT		12
+#define PAGE_SIZE		(_UL(1) << PAGE_SHIFT)
+
+#define THREAD_SIZE_ORDER 2
+#define THREAD_SIZE (PAGE_SIZE << THREAD_SIZE_ORDER)
+
 #endif
 
 /*=============================== ARCH SPECIFIC ===========================*/

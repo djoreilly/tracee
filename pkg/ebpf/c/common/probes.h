@@ -11,6 +11,20 @@
 #include <common/context.h>
 #include <common/filtering.h>
 
+#ifdef bpf_target_s390
+#undef PT_REGS_PARM6
+#define STACK_PARM6_OFFSET 96
+// XXX JEFFM I have no idea if this will actually work
+// s390 passes arguments 6+ on stack. PARM6 = sp + 96, PARM7 = sp + 104, etc.
+static inline unsigned long PT_REGS_PARM6(struct pt_regs *ctx)
+{
+        unsigned long result;
+        bpf_probe_read_kernel(&result, sizeof(unsigned long),
+                              (unsigned long *)(PT_REGS_SP(ctx) + STACK_PARM6_OFFSET));
+        return result;
+}
+#endif
+
 #define TRACE_ENT_FUNC(name, id)                                                                   \
     int trace_##name(struct pt_regs *ctx)                                                          \
     {                                                                                              \

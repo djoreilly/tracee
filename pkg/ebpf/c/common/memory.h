@@ -182,7 +182,7 @@ statfunc bool vma_is_anon(struct vm_area_struct *vma)
 // the kernel to use the specified address or fail the mapping, so it is safe to
 // rely on the address pattern to determine if it belongs to a heap arena.
 #define GOLANG_ARENA_HINT_MASK 0xffffffff00000000UL
-#if defined(bpf_target_x86) || defined(bpf_target_powerpc)
+#if defined(bpf_target_x86) || defined(bpf_target_powerpc) || defined(bpf_target_s390)
     #define GOLANG_ARENA_HINT (0xc0UL << 32)
 #elif defined(bpf_target_arm64)
     #define GOLANG_ARENA_HINT (0x40UL << 32)

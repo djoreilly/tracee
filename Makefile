@@ -190,6 +190,12 @@ ifeq ($(UNAME_M),ppc64le)
 	GO_ARCH = ppc64le
 endif
 
+ifeq ($(UNAME_M),s390x)
+	ARCH = s390x
+	LINUX_ARCH = s390
+	GO_ARCH = s390x
+endif
+
 .PHONY: env
 env:
 	@echo ---------------------------------------

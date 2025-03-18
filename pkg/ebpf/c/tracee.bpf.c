@@ -586,6 +586,9 @@ statfunc void update_thread_stack(void *ctx, task_info_t *task_info, struct task
 #elif defined(bpf_target_powerpc) // XXXJEFFM
     struct pt_regs *thread_regs = (struct pt_regs *) BPF_CORE_READ(task, thread.ksp);
     u64 thread_sp = BPF_CORE_READ(thread_regs, gpr[1]);
+#elif defined(bpf_target_s390) // XXXJEFFM
+    struct pt_regs *thread_regs = (struct pt_regs *) BPF_CORE_READ(task, thread.ksp);
+    u64 thread_sp = BPF_CORE_READ(thread_regs, gprs[15]);
 #else
     #error Unsupported architecture
 #endif
@@ -1130,7 +1133,7 @@ statfunc int check_is_proc_modules_hooked(program_data_t *p)
     pos = list_first_entry_ebpf(head, typeof(*pos), list);
     n = pos;
 
-#if !defined(bpf_target_powerpc)
+#if !(defined(bpf_target_powerpc) || defined(bpf_target_s390))
 #pragma unroll
 #endif
     for (int i = 0; i < MAX_NUM_MODULES; i++) {
@@ -1214,6 +1217,9 @@ int uprobe_lkm_seeker_submitter(struct pt_regs *ctx)
 #elif defined(bpf_target_powerpc)
     mod_address = ctx->user_regs.gpr[3];    // 1st arg
     received_flags = ctx->user_regs.gpr[4]; // 2nd arg
+#elif defined(bpf_target_s390)
+    mod_address = ctx->user_regs.gprs[3];    // 1st arg
+    received_flags = ctx->user_regs.gprs[4]; // 2nd arg
 #else
     return 0;
 #endif
@@ -1814,6 +1820,9 @@ int uprobe_seq_ops_trigger(struct pt_regs *ctx)
     #elif defined(bpf_target_powerpc) // XXXJEFFM
         caller_ctx_id = ctx->user_regs.gpr[3]; // 1st arg
         address_array = ((void *) ctx->user_regs.gpr[31] + 8); // 2nd arg
+    #elif defined(bpf_target_s390) // XXXJEFFM
+        caller_ctx_id = ctx->user_regs.gprs[3]; // 1st arg
+        address_array = ((void *) ctx->gprs[15] + 8); // 2nd arg
     #else
         return 0;
     #endif
@@ -1899,6 +1908,10 @@ int uprobe_mem_dump_trigger(struct pt_regs *ctx)
     address = ctx->user_regs.gpr[3];        // 1st arg
     size = ctx->user_regs.gpr[4];           // 2nd arg
     caller_ctx_id = ctx->user_regs.gpr[5];  // 3rd arg
+#elif defined(bpf_target_s390) // XXXJEFFM
+    address = ctx->user_regs.gprs[3];        // 1st arg
+    size = ctx->user_regs.gprs[4];           // 2nd arg
+    caller_ctx_id = ctx->user_regs.gprs[5];  // 3rd arg
 #else
     return 0;
 #endif

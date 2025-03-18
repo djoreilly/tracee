@@ -1,4 +1,4 @@
-//go:build !(ppc64le || ppc64)
+//go:build !(ppc64le || ppc64 || s390x)
 
 package environment
 
