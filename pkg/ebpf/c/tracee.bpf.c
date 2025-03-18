@@ -583,6 +583,9 @@ statfunc void update_thread_stack(void *ctx, task_info_t *task_info, struct task
 #elif defined(bpf_target_arm64)
     struct pt_regs *thread_regs = (struct pt_regs *) BPF_CORE_READ(task, thread.cpu_context.sp);
     u64 thread_sp = BPF_CORE_READ(thread_regs, sp);
+#elif defined(bpf_target_powerpc) // XXXJEFFM
+    struct pt_regs *thread_regs = (struct pt_regs *) BPF_CORE_READ(task, thread.ksp);
+    u64 thread_sp = BPF_CORE_READ(thread_regs, gpr[1]);
 #else
     #error Unsupported architecture
 #endif
@@ -1198,12 +1201,17 @@ int uprobe_lkm_seeker_submitter(struct pt_regs *ctx)
     u64 mod_address = 0;
     u64 received_flags = 0;
 
+    // The "real" first argument refers to the instance associated with the call.
+
 #if defined(bpf_target_x86)
     mod_address = ctx->bx;    // 1st arg
     received_flags = ctx->cx; // 2nd arg
 #elif defined(bpf_target_arm64)
     mod_address = ctx->user_regs.regs[1];    // 1st arg
     received_flags = ctx->user_regs.regs[2]; // 2nd arg
+#elif defined(bpf_target_powerpc)
+    mod_address = ctx->user_regs.gpr[3];    // 1st arg
+    received_flags = ctx->user_regs.gpr[4]; // 2nd arg
 #else
     return 0;
 #endif
@@ -1801,7 +1809,9 @@ int uprobe_seq_ops_trigger(struct pt_regs *ctx)
     #elif defined(bpf_target_arm64)
         caller_ctx_id = ctx->user_regs.regs[1]; // 1st arg
         address_array = ((void *) ctx->sp + 8); // 2nd arg
-
+    #elif defined(bpf_target_powerpc) // XXXJEFFM
+        caller_ctx_id = ctx->user_regs.gpr[3]; // 1st arg
+        address_array = ((void *) ctx->user_regs.gpr[31] + 8); // 2nd arg
     #else
         return 0;
     #endif
@@ -1883,6 +1893,10 @@ int uprobe_mem_dump_trigger(struct pt_regs *ctx)
     address = ctx->user_regs.regs[1];        // 1st arg
     size = ctx->user_regs.regs[2];           // 2nd arg
     caller_ctx_id = ctx->user_regs.regs[3];  // 3rd arg
+#elif defined(bpf_target_powerpc) // XXXJEFFM
+    address = ctx->user_regs.gpr[3];        // 1st arg
+    size = ctx->user_regs.gpr[4];           // 2nd arg
+    caller_ctx_id = ctx->user_regs.gpr[5];  // 3rd arg
 #else
     return 0;
 #endif
@@ -5489,6 +5503,11 @@ statfunc void check_stack_pivot(void *ctx, struct pt_regs *regs, u32 syscall)
     if (!evaluate_scope_filters(&p))
         return;
 
+    // This is a hack and should be fixed in libbpf.
+#ifdef __TARGET_ARCH_powerpc
+#undef __PT_SP_REG
+#define __PT_SP_REG gpr[1]
+#endif
     // Get stack pointer
     u64 sp = PT_REGS_SP_CORE(regs);
 

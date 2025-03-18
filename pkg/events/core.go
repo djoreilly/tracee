@@ -12882,6 +12882,10 @@ var CoreEvents = map[ID]Definition{
 				{handle: probes.ExecuteAtFinishedARM, required: false},
 				{handle: probes.ExecuteFinishedCompatARM, required: false},
 				{handle: probes.ExecuteAtFinishedCompatARM, required: false},
+				{handle: probes.ExecuteFinishedGeneric, required: false},
+				{handle: probes.ExecuteAtFinishedGeneric, required: false},
+				{handle: probes.ExecuteFinishedCompatGeneric, required: false},
+				{handle: probes.ExecuteAtFinishedCompatGeneric, required: false},
 			},
 		},
 		fields: []trace.ArgMeta{

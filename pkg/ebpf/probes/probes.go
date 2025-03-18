@@ -147,6 +147,10 @@ const (
 	ExecuteAtFinishedARM
 	ExecuteFinishedCompatARM
 	ExecuteAtFinishedCompatARM
+	ExecuteFinishedGeneric
+	ExecuteAtFinishedGeneric
+	ExecuteFinishedCompatGeneric
+	ExecuteAtFinishedCompatGeneric
 	SecurityTaskSetrlimit
 	SecuritySettime64
 	Ptrace

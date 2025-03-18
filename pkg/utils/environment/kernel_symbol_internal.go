@@ -1,3 +1,5 @@
+//go:build !(ppc64le || ppc64)
+
 package environment
 
 const (

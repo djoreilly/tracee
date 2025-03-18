@@ -184,6 +184,12 @@ ifeq ($(UNAME_M),aarch64)
 	GO_ARCH = arm64
 endif
 
+ifeq ($(UNAME_M),ppc64le)
+	ARCH = ppc64le
+	LINUX_ARCH = powerpc
+	GO_ARCH = ppc64le
+endif
+
 .PHONY: env
 env:
 	@echo ---------------------------------------

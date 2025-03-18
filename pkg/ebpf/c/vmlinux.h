@@ -129,6 +129,69 @@ struct pt_regs {
     u64 exit_rcu;
 };
 
+#elif defined(__TARGET_ARCH_powerpc)
+
+struct thread_info {
+	unsigned long flags;
+};
+
+struct user_pt_regs
+{
+        unsigned long gpr[32];
+        unsigned long nip;
+        unsigned long msr;
+        unsigned long orig_gpr3;
+        unsigned long ctr;
+        unsigned long link;
+        unsigned long xer;
+        unsigned long ccr;
+        unsigned long softe;
+        unsigned long trap;
+        unsigned long dar;
+        unsigned long dsisr;
+        unsigned long result;
+};
+
+struct pt_regs
+{
+        union {
+                struct user_pt_regs user_regs;
+                struct {
+                        unsigned long gpr[32];
+                        unsigned long nip;
+                        unsigned long msr;
+                        unsigned long orig_gpr3;
+                        unsigned long ctr;
+                        unsigned long link;
+                        unsigned long xer;
+                        unsigned long ccr;
+                        unsigned long softe;
+                        unsigned long trap;
+                        union {
+                                unsigned long dar;
+                                unsigned long dear;
+                        };
+                        union {
+                                unsigned long dsisr;
+                                unsigned long esr;
+                        };
+                        unsigned long result;
+                };
+        };
+        union {
+                struct {
+                        unsigned long ppr;
+                        unsigned long exit_result;
+                        union {
+                                unsigned long kuap;
+                                unsigned long amr;
+                        };
+                        unsigned long iamr;
+                };
+                unsigned long __pad[4];
+        };
+};
+
 #endif
 
 // common to all architectures
@@ -274,6 +337,11 @@ struct cpu_context {
 
 struct thread_struct {
     struct cpu_context cpu_context;
+};
+
+#elif defined(__TARGET_ARCH_powerpc)
+struct thread_struct {
+	unsigned long ksp;
 };
 
 #endif
