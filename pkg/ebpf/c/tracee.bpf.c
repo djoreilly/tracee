@@ -1130,7 +1130,9 @@ statfunc int check_is_proc_modules_hooked(program_data_t *p)
     pos = list_first_entry_ebpf(head, typeof(*pos), list);
     n = pos;
 
+#if !defined(bpf_target_powerpc)
 #pragma unroll
+#endif
     for (int i = 0; i < MAX_NUM_MODULES; i++) {
         pos = n;
         n = list_next_entry_ebpf(n, list);
