@@ -327,6 +327,7 @@ statfunc int __save_str_arr_to_buf(args_buffer_t *buf, const char *const *ptr, u
     // Data saved to submit buf: [index][string count][str1 size][str1][str2 size][str2]...
 
     u8 elem_num = 0;
+    u16 offset; // Helps the verifier - it loses the bounds check between accesses of buf->offset
 
     if (buf->offset > ARGS_BUF_SIZE - 1)
         return 0;
@@ -341,21 +342,20 @@ statfunc int __save_str_arr_to_buf(args_buffer_t *buf, const char *const *ptr, u
 #pragma unroll
     for (int i = 0; i < MAX_STR_ARR_ELEM; i++) {
         const char *argp = NULL;
+        offset = buf->offset;
+
         bpf_probe_read_cb(&argp, sizeof(argp), &ptr[i]);
         if (!argp)
             goto out;
 
-        if (buf->offset > ARGS_BUF_SIZE - MAX_STRING_SIZE - sizeof(int))
+        if (offset > ARGS_BUF_SIZE - MAX_STRING_SIZE - sizeof(int))
             // not enough space - return
             goto out;
 
         // Read into buffer
-        int sz = bpf_probe_read_str_cb(&(buf->args[buf->offset + sizeof(int)]), MAX_STRING_SIZE, argp);
+        int sz = bpf_probe_read_str_cb((&buf->args[offset + sizeof(int)]), MAX_STRING_SIZE, argp);
         if (sz > 0) {
-            if (buf->offset > ARGS_BUF_SIZE - sizeof(int))
-                // Satisfy validator
-                goto out;
-            bpf_probe_read_cb(&(buf->args[buf->offset]), sizeof(int), &sz);
+            bpf_probe_read_cb(&(buf->args[offset]), sizeof(int), &sz);
             buf->offset += sz + sizeof(int);
             elem_num++;
             continue;
@@ -365,17 +365,15 @@ statfunc int __save_str_arr_to_buf(args_buffer_t *buf, const char *const *ptr, u
     }
     // handle truncated argument list
     char ellipsis[] = "...";
-    if (buf->offset > ARGS_BUF_SIZE - MAX_STRING_SIZE - sizeof(int))
+    offset = buf->offset;
+    if (offset > ARGS_BUF_SIZE - MAX_STRING_SIZE - sizeof(int))
         // not enough space - return
         goto out;
 
     // Read into buffer
-    int sz = bpf_probe_read_str_cb(&(buf->args[buf->offset + sizeof(int)]), MAX_STRING_SIZE, ellipsis);
+    int sz = bpf_probe_read_str_cb(&(buf->args[offset + sizeof(int)]), MAX_STRING_SIZE, ellipsis);
     if (sz > 0) {
-        if (buf->offset > ARGS_BUF_SIZE - sizeof(int))
-            // Satisfy validator
-            goto out;
-        bpf_probe_read_cb(&(buf->args[buf->offset]), sizeof(int), &sz);
+        bpf_probe_read_cb(&(buf->args[offset]), sizeof(int), &sz);
         buf->offset += sz + sizeof(int);
         elem_num++;
     }
