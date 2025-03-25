@@ -2,6 +2,7 @@ package filters
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -128,9 +129,9 @@ func TestDatasFilter_Filter(t *testing.T) {
 			name:                   "Matching 'syscall' data value of sys_enter as string",
 			eventID:                events.SysEnter,
 			fieldName:              "syscall",
-			parseOperatorAndValues: "=open",
+			parseOperatorAndValues: "=openat",
 			args: []trace.Argument{
-				newArgument("syscall", "int", 2),
+				newArgument("syscall", "int", events.Openat),
 			},
 			expected: true,
 		},
@@ -178,9 +179,9 @@ func TestDatasFilter_Filter(t *testing.T) {
 			name:                   "Matching 'syscall' data value of hooked_syscall as int",
 			eventID:                events.HookedSyscall,
 			fieldName:              "syscall",
-			parseOperatorAndValues: "=2",
+			parseOperatorAndValues: fmt.Sprintf("=%d", events.Openat),
 			args: []trace.Argument{
-				newArgument("syscall", "string", "open"),
+				newArgument("syscall", "string", "openat"),
 			},
 			expected: true,
 		},
