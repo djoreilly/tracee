@@ -41,7 +41,7 @@ func TestDecodeContext(t *testing.T) {
 		PoliciesVersion: 11,
 		MatchedPolicies: 1917,
 	}
-	err := binary.Write(buf, binary.LittleEndian, eCtxExpected)
+	err := binary.Write(buf, binary.NativeEndian, eCtxExpected)
 	assert.Equal(t, nil, err)
 	var eCtxObtained EventContext
 	rawData := buf.Bytes()
@@ -63,7 +63,7 @@ func TestDecodeUint8(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	var expected uint8 = 42
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	// checking no error
 	assert.Equal(t, nil, err)
 	b := buf.Bytes()
@@ -85,7 +85,7 @@ func TestDecodeInt8(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	var expected int8 = -42
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	// checking no error
 	assert.Equal(t, nil, err)
 	b := buf.Bytes()
@@ -107,7 +107,7 @@ func TestDecodeUint16(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	var expected uint16 = 5555
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	// checking no error
 	assert.Equal(t, nil, err)
 	b := buf.Bytes()
@@ -150,7 +150,7 @@ func TestDecodeInt16(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	var expected int16 = -3456
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	// checking no error
 	assert.Equal(t, nil, err)
 	b := buf.Bytes()
@@ -172,7 +172,7 @@ func TestDecodeUint32(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	var expected uint32 = 5555
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	// checking no error
 	assert.Equal(t, nil, err)
 	b := buf.Bytes()
@@ -215,7 +215,7 @@ func TestDecodeInt32(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	var expected int32 = -3456
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	// checking no error
 	assert.Equal(t, nil, err)
 	b := buf.Bytes()
@@ -237,7 +237,7 @@ func TestDecodeUint64(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	var expected uint64 = 5555
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	// checking no error
 	assert.Equal(t, nil, err)
 	b := buf.Bytes()
@@ -259,7 +259,7 @@ func TestDecodeInt64(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	var expected int64 = -3456
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	// checking no error
 	assert.Equal(t, nil, err)
 	b := buf.Bytes()
@@ -281,7 +281,7 @@ func TestDecodeBoolTrue(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	expected := true
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	// checking no error
 	assert.Equal(t, nil, err)
 	b := buf.Bytes()
@@ -303,7 +303,7 @@ func TestDecodeBoolFalse(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	expected := false
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	// checking no error
 	assert.Equal(t, nil, err)
 	b := buf.Bytes()
@@ -333,7 +333,7 @@ func TestDecodeBytes(t *testing.T) {
 		A2: 444434,
 	}
 	buf := new(bytes.Buffer)
-	err := binary.Write(buf, binary.LittleEndian, &expected)
+	err := binary.Write(buf, binary.NativeEndian, &expected)
 	assert.Equal(t, nil, err)
 
 	var sunPathBuf [12]byte // 12 is the size of JustAStruct
@@ -343,7 +343,7 @@ func TestDecodeBytes(t *testing.T) {
 
 	r := bytes.NewBuffer(sunPathBuf[:])
 	var obtained JustAStruct
-	err = binary.Read(r, binary.LittleEndian, &obtained)
+	err = binary.Read(r, binary.NativeEndian, &obtained)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, expected, obtained)
 }
@@ -360,7 +360,7 @@ func TestDecodeIntArray(t *testing.T) {
 	rawcp := append(raw, 1, 2, 3, 4, 5, 6, 7, 8)
 	dataBuff := bytes.NewBuffer(rawcp)
 	var expected [2]int32
-	err = binary.Read(dataBuff, binary.LittleEndian, &expected)
+	err = binary.Read(dataBuff, binary.NativeEndian, &expected)
 	assert.Equal(t, nil, err)
 	// checking decoding works as expected
 	assert.Equal(t, expected, obtained)
@@ -387,7 +387,7 @@ func TestDecodeSlimCred(t *testing.T) {
 		CapBounding:    5555,
 		CapAmbient:     432,
 	}
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	assert.Equal(t, nil, err)
 	var obtained SlimCred
 	rawBuf := buf.Bytes()
@@ -408,7 +408,7 @@ func TestDecodeChunkMeta(t *testing.T) {
 		Size:     6543,
 		Off:      76543,
 	}
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	assert.Equal(t, nil, err)
 	var obtained ChunkMeta
 	rawBuf := buf.Bytes()
@@ -428,7 +428,7 @@ func TestDecodeVfsWriteMeta(t *testing.T) {
 		Mode:  654,
 		Pid:   98479,
 	}
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	assert.Equal(t, nil, err)
 	var obtained VfsFileMeta
 	rawBuf := buf.Bytes()
@@ -448,7 +448,7 @@ func TestDecodeKernelModuleMeta(t *testing.T) {
 		Pid:   7654,
 		Size:  4533,
 	}
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	assert.Equal(t, nil, err)
 	var obtained KernelModuleMeta
 	rawBuf := buf.Bytes()
@@ -468,7 +468,7 @@ func TestDecodeBpfObjectMeta(t *testing.T) {
 		Pid:  7654,
 		Size: 4533,
 	}
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	assert.Equal(t, nil, err)
 	var obtained BpfObjectMeta
 	rawBuf := buf.Bytes()
@@ -486,7 +486,7 @@ func TestDecodeMprotectWriteMeta(t *testing.T) {
 		Pid: 12,
 		Ts:  6789,
 	}
-	err := binary.Write(buf, binary.LittleEndian, expected)
+	err := binary.Write(buf, binary.NativeEndian, expected)
 	assert.Equal(t, nil, err)
 	var obtained MprotectWriteMeta
 	rawBuf := buf.Bytes()
@@ -566,7 +566,7 @@ func BenchmarkBinaryContext(*testing.B) {
 		0, 0, 0}
 	for i := 0; i < 100; i++ {
 		binBuf := bytes.NewBuffer(buffer)
-		binary.Read(binBuf, binary.LittleEndian, &eCtx)
+		binary.Read(binBuf, binary.NativeEndian, &eCtx)
 	}
 }
 
@@ -584,7 +584,7 @@ func BenchmarkBinaryUint8(*testing.B) {
 	var num uint8
 	for i := 0; i < 100; i++ {
 		decoder := bytes.NewBuffer(buffer)
-		binary.Read(decoder, binary.LittleEndian, &num)
+		binary.Read(decoder, binary.NativeEndian, &num)
 	}
 }
 
@@ -602,7 +602,7 @@ func BenchmarkBinaryInt8(*testing.B) {
 	var num int8
 	for i := 0; i < 100; i++ {
 		decoder := bytes.NewBuffer(buffer)
-		binary.Read(decoder, binary.LittleEndian, &num)
+		binary.Read(decoder, binary.NativeEndian, &num)
 	}
 }
 
@@ -620,7 +620,7 @@ func BenchmarkBinaryUint16(*testing.B) {
 	var num uint16
 	for i := 0; i < 100; i++ {
 		decoder := bytes.NewBuffer(buffer)
-		binary.Read(decoder, binary.LittleEndian, &num)
+		binary.Read(decoder, binary.NativeEndian, &num)
 	}
 }
 
@@ -638,7 +638,7 @@ func BenchmarkBinaryInt16(*testing.B) {
 	var num int16
 	for i := 0; i < 100; i++ {
 		decoder := bytes.NewBuffer(buffer)
-		binary.Read(decoder, binary.LittleEndian, &num)
+		binary.Read(decoder, binary.NativeEndian, &num)
 	}
 }
 
@@ -656,7 +656,7 @@ func BenchmarkBinaryUint32(*testing.B) {
 	var num uint32
 	for i := 0; i < 100; i++ {
 		decoder := bytes.NewBuffer(buffer)
-		binary.Read(decoder, binary.LittleEndian, &num)
+		binary.Read(decoder, binary.NativeEndian, &num)
 	}
 }
 func BenchmarkDecodeInt32(*testing.B) {
@@ -673,7 +673,7 @@ func BenchmarkBinaryInt32(*testing.B) {
 	var num int32
 	for i := 0; i < 100; i++ {
 		decoder := bytes.NewBuffer(buffer)
-		binary.Read(decoder, binary.LittleEndian, &num)
+		binary.Read(decoder, binary.NativeEndian, &num)
 	}
 }
 
@@ -691,7 +691,7 @@ func BenchmarkBinaryUint64(*testing.B) {
 	var num uint64
 	for i := 0; i < 100; i++ {
 		decoder := bytes.NewBuffer(buffer)
-		binary.Read(decoder, binary.LittleEndian, &num)
+		binary.Read(decoder, binary.NativeEndian, &num)
 	}
 }
 
@@ -709,7 +709,7 @@ func BenchmarkBinaryInt64(*testing.B) {
 	var num int64
 	for i := 0; i < 100; i++ {
 		decoder := bytes.NewBuffer(buffer)
-		binary.Read(decoder, binary.LittleEndian, &num)
+		binary.Read(decoder, binary.NativeEndian, &num)
 	}
 }
 
@@ -726,7 +726,7 @@ func BenchmarkBinaryBool(*testing.B) {
 	var num bool
 	for i := 0; i < 100; i++ {
 		decoder := bytes.NewBuffer(buffer)
-		binary.Read(decoder, binary.LittleEndian, &num)
+		binary.Read(decoder, binary.NativeEndian, &num)
 	}
 }
 
@@ -794,7 +794,7 @@ func BenchmarkBinarySlimCred(*testing.B) {
 	var s trace.SlimCred
 	for i := 0; i < 100; i++ {
 		binBuf := bytes.NewBuffer(buffer)
-		binary.Read(binBuf, binary.LittleEndian, &s)
+		binary.Read(binBuf, binary.NativeEndian, &s)
 	}
 }
 
@@ -887,7 +887,7 @@ func BenchmarkBinaryChunkMeta(*testing.B) {
 	var s ChunkMeta
 	for i := 0; i < 100; i++ {
 		binBuf := bytes.NewBuffer(buffer)
-		binary.Read(binBuf, binary.LittleEndian, &s)
+		binary.Read(binBuf, binary.NativeEndian, &s)
 	}
 }
 
@@ -929,7 +929,7 @@ func BenchmarkBinaryVfsWriteMeta(*testing.B) {
 	var s VfsFileMeta
 	for i := 0; i < 100; i++ {
 		binBuf := bytes.NewBuffer(buffer)
-		binary.Read(binBuf, binary.LittleEndian, &s)
+		binary.Read(binBuf, binary.NativeEndian, &s)
 	}
 }
 
@@ -969,7 +969,7 @@ func BenchmarkBinaryKernelModuleMeta(*testing.B) {
 	var s KernelModuleMeta
 	for i := 0; i < 100; i++ {
 		binBuf := bytes.NewBuffer(buffer)
-		binary.Read(binBuf, binary.LittleEndian, &s)
+		binary.Read(binBuf, binary.NativeEndian, &s)
 	}
 }
 
@@ -1003,7 +1003,7 @@ func BenchmarkBinaryMprotectWriteMeta(*testing.B) {
 	var s MprotectWriteMeta
 	for i := 0; i < 100; i++ {
 		binBuf := bytes.NewBuffer(buffer)
-		binary.Read(binBuf, binary.LittleEndian, &s)
+		binary.Read(binBuf, binary.NativeEndian, &s)
 	}
 }
 

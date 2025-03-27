@@ -221,13 +221,13 @@ func newModsCheckForHidden(startScanTime uint64, flags uint32) error {
 		func() error {
 			var iter = newModuleOnlyMap.Iterator()
 			for iter.Next() {
-				addr := binary.LittleEndian.Uint64(iter.Key())
+				addr := binary.NativeEndian.Uint64(iter.Key())
 				curVal, err := newModuleOnlyMap.GetValue(unsafe.Pointer(&addr))
 				if err != nil {
 					return err
 				}
-				insertTime := binary.LittleEndian.Uint64(curVal[0:8])
-				lastSeenTime := binary.LittleEndian.Uint64(curVal[8:16])
+				insertTime := binary.NativeEndian.Uint64(curVal[0:8])
+				lastSeenTime := binary.NativeEndian.Uint64(curVal[8:16])
 				if insertTime <= startScanTime && lastSeenTime < startScanTime {
 					// It was inserted before the current scan, and we did not
 					// see it in the scan: it is hidden. The receiving end will
@@ -261,7 +261,7 @@ func clearMap(bpfMap *bpf.BPFMap) error {
 	var err error
 	var iter = bpfMap.Iterator()
 	for iter.Next() {
-		addr := binary.LittleEndian.Uint64(iter.Key())
+		addr := binary.NativeEndian.Uint64(iter.Key())
 		err = bpfMap.DeleteKey(unsafe.Pointer(&addr))
 		if err != nil {
 			logger.Errorw("Err occurred DeleteKey: " + err.Error())

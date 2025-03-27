@@ -148,9 +148,9 @@ func updateOuterMapWithEventId(m *bpf.Module, mapName string, mapVersion uint16,
 	}
 
 	keyBytes := make([]byte, 8)
-	binary.LittleEndian.PutUint16(keyBytes, mapVersion)          // version
-	binary.LittleEndian.PutUint16(keyBytes[2:], 0)               // padding
-	binary.LittleEndian.PutUint32(keyBytes[4:], uint32(eventId)) // eventid
+	binary.NativeEndian.PutUint16(keyBytes, mapVersion)          // version
+	binary.NativeEndian.PutUint16(keyBytes[2:], 0)               // padding
+	binary.NativeEndian.PutUint32(keyBytes[4:], uint32(eventId)) // eventid
 	keyPointer := unsafe.Pointer(&keyBytes[0])
 
 	innerMapFD := uint32(innerMap.FileDescriptor())
@@ -331,7 +331,9 @@ func (ps *policies) createNewEventsMapVersion(
 			},
 		}
 
-		err := newInnerMap.Update(unsafe.Pointer(&id), unsafe.Pointer(&eventConfig))
+		idU32 := uint32(id)
+
+		err := newInnerMap.Update(unsafe.Pointer(&idU32), unsafe.Pointer(&eventConfig))
 		if err != nil {
 			return errfmt.WrapError(err)
 		}
@@ -356,8 +358,8 @@ func (ps *policies) updateUIntFilterBPF(uintEqualities map[uint64]equality, inne
 		eqVal := make([]byte, equalityValueSize)
 		valuePointer := unsafe.Pointer(&eqVal[0])
 
-		binary.LittleEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
-		binary.LittleEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
 
 		bpfMap, ok := ps.bpfInnerMaps[innerMapName]
 		if !ok {
@@ -389,8 +391,8 @@ func (ps *policies) updateStringFilterBPF(strEqualities map[string]equality, inn
 		eqVal := make([]byte, equalityValueSize)
 		valuePointer := unsafe.Pointer(&eqVal[0])
 
-		binary.LittleEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
-		binary.LittleEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
 
 		bpfMap, ok := ps.bpfInnerMaps[innerMapName]
 		if !ok {
@@ -416,8 +418,8 @@ func (ps *policies) updateProcTreeFilterBPF(procTreeEqualities map[uint32]equali
 		eqVal := make([]byte, equalityValueSize)
 		valuePointer := unsafe.Pointer(&eqVal[0])
 
-		binary.LittleEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
-		binary.LittleEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
 
 		bpfMap, ok := ps.bpfInnerMaps[innerMapName]
 		if !ok {
@@ -516,7 +518,7 @@ func (ps *policies) updateBinaryFilterBPF(binEqualities map[filters.NSBinary]equ
 			copy(binBytes, k.Path)
 		} else {
 			// otherwise, key is composed of the mount namespace and the path
-			binary.LittleEndian.PutUint32(binBytes, k.MntNS)
+			binary.NativeEndian.PutUint32(binBytes, k.MntNS)
 			copy(binBytes[4:], k.Path)
 		}
 		keyPointer := unsafe.Pointer(&binBytes[0])
@@ -524,8 +526,8 @@ func (ps *policies) updateBinaryFilterBPF(binEqualities map[filters.NSBinary]equ
 		eqVal := make([]byte, equalityValueSize)
 		valuePointer := unsafe.Pointer(&eqVal[0])
 
-		binary.LittleEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
-		binary.LittleEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
 
 		bpfMap, ok := ps.bpfInnerMaps[innerMapName]
 		if !ok {
@@ -557,7 +559,7 @@ func (ps *policies) updateStringDataFilterLPMBPF(dataEqualities map[KernelDataFi
 		// multiplication by 8 - convert prefix length from bytes to bits
 		// for LPM Trie compatibility.
 		prefixlen := len(k.String) * 8
-		binary.LittleEndian.PutUint32(binBytes, uint32(prefixlen)) // prefixlen
+		binary.NativeEndian.PutUint32(binBytes, uint32(prefixlen)) // prefixlen
 		copy(binBytes[4:], k.String)                               // string
 
 		keyPointer := unsafe.Pointer(&binBytes[0])
@@ -565,8 +567,8 @@ func (ps *policies) updateStringDataFilterLPMBPF(dataEqualities map[KernelDataFi
 		eqVal := make([]byte, equalityValueSize)
 		valuePointer := unsafe.Pointer(&eqVal[0])
 
-		binary.LittleEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
-		binary.LittleEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
 
 		innerMapName := fmt.Sprintf("%s_%d_%d", innerMapName, ps.version(), uint32(k.ID))
 
@@ -603,8 +605,8 @@ func (ps *policies) updateStringDataFilterBPF(dataEqualities map[KernelDataField
 		eqVal := make([]byte, equalityValueSize)
 		valuePointer := unsafe.Pointer(&eqVal[0])
 
-		binary.LittleEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
-		binary.LittleEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[0:8], v.equalsInPolicies)
+		binary.NativeEndian.PutUint64(eqVal[8:16], v.keyUsedInPolicies)
 
 		innerMapName := fmt.Sprintf("%s_%d_%d", innerMapName, ps.version(), uint32(k.ID))
 

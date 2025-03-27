@@ -580,12 +580,15 @@ func (t *Tracee) initTailCall(tailCall events.TailCall) error {
 		if index >= uint32(events.Unsupported) {
 			continue
 		}
+		indexU32 := uint32(index)
+		fdU32 := uint32(bpfProgFD)
 		// Update given eBPF map with the eBPF program file descriptor at given index.
-		err := bpfMap.Update(unsafe.Pointer(&index), unsafe.Pointer(&bpfProgFD))
+		err := bpfMap.Update(unsafe.Pointer(&indexU32), unsafe.Pointer(&fdU32))
 		if err != nil {
 			return errfmt.WrapError(err)
 		}
 	}
+
 
 	return nil
 }
@@ -1052,8 +1055,8 @@ func (t *Tracee) populateBPFMaps() error {
 
 		netConfigVal := make([]byte, 8) // u32 capture_options + u32 capture_length
 		options := pcaps.GetPcapOptions(t.config.Capture.Net)
-		binary.LittleEndian.PutUint32(netConfigVal[0:4], uint32(options))
-		binary.LittleEndian.PutUint32(netConfigVal[4:8], t.config.Capture.Net.CaptureLength)
+		binary.NativeEndian.PutUint32(netConfigVal[0:4], uint32(options))
+		binary.NativeEndian.PutUint32(netConfigVal[4:8], t.config.Capture.Net.CaptureLength)
 
 		cZero := uint32(0)
 		err = bpfNetConfigMap.Update(unsafe.Pointer(&cZero), unsafe.Pointer(&netConfigVal[0]))

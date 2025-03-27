@@ -55,7 +55,7 @@ func (t *Tracee) countPerfEventSubmissions(ctx context.Context) {
 			// Get the counts of each event from the BPF map
 			iter := evtsCountsBPFMap.Iterator()
 			for iter.Next() {
-				key := binary.LittleEndian.Uint32(iter.Key())
+				key := binary.NativeEndian.Uint32(iter.Key())
 				value, err := evtsCountsBPFMap.GetValue(unsafe.Pointer(&key))
 				if err != nil {
 					logger.Errorw("Failed to get value from events_stats map", "error", err)
@@ -64,8 +64,8 @@ func (t *Tracee) countPerfEventSubmissions(ctx context.Context) {
 
 				// Get counts
 				id := events.ID(key)
-				attempts := binary.LittleEndian.Uint64(value[0:8])
-				failures := binary.LittleEndian.Uint64(value[8:16])
+				attempts := binary.NativeEndian.Uint64(value[0:8])
+				failures := binary.NativeEndian.Uint64(value[8:16])
 				t.stats.BPFPerfEventSubmitAttemptsCount.Set(id, attempts)
 				t.stats.BPFPerfEventSubmitFailuresCount.Set(id, failures)
 

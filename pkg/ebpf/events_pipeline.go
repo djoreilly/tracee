@@ -655,7 +655,7 @@ func (t *Tracee) getStackAddresses(stackID uint32) []uint64 {
 	stackCounter := 0
 	for i := 0; i < len(stackBytes); i += stackFrameSize {
 		stackAddresses[stackCounter] = 0
-		stackAddr := binary.LittleEndian.Uint64(stackBytes[i : i+stackFrameSize])
+		stackAddr := binary.NativeEndian.Uint64(stackBytes[i : i+stackFrameSize])
 		if stackAddr == 0 {
 			break
 		}

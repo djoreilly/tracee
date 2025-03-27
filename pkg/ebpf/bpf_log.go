@@ -162,15 +162,15 @@ func (b *BPFLog) Decode(rawBuffer []byte) error {
 		return errfmt.Errorf("can't decode log raw data - buffer of %d should have at least %d bytes", len(rawBuffer), b.Size())
 	}
 
-	b.id = BPFLogType(binary.LittleEndian.Uint32(rawBuffer[0:4]))
-	b.logLevel = logger.Level(binary.LittleEndian.Uint32(rawBuffer[4:8])) // this is an int8 (zapcore.Level)
-	b.count = binary.LittleEndian.Uint32(rawBuffer[8:12])
-	b.padding = binary.LittleEndian.Uint32(rawBuffer[12:16])
+	b.id = BPFLogType(binary.NativeEndian.Uint32(rawBuffer[0:4]))
+	b.logLevel = logger.Level(binary.NativeEndian.Uint32(rawBuffer[4:8])) // this is an int8 (zapcore.Level)
+	b.count = binary.NativeEndian.Uint32(rawBuffer[8:12])
+	b.padding = binary.NativeEndian.Uint32(rawBuffer[12:16])
 
 	// bpf_log
-	b.ret = int64(binary.LittleEndian.Uint64(rawBuffer[16:24]))
-	b.cpu = binary.LittleEndian.Uint32(rawBuffer[24:28])
-	b.line = binary.LittleEndian.Uint32(rawBuffer[28:32])
+	b.ret = int64(binary.NativeEndian.Uint64(rawBuffer[16:24]))
+	b.cpu = binary.NativeEndian.Uint32(rawBuffer[24:28])
+	b.line = binary.NativeEndian.Uint32(rawBuffer[28:32])
 	copy(b.file[:], rawBuffer[32:104])
 	// bpf_log
 
