@@ -355,7 +355,7 @@ statfunc int __save_str_arr_to_buf(args_buffer_t *buf, const char *const *ptr, u
         // Read into buffer
         int sz = bpf_probe_read_str_cb((&buf->args[offset + sizeof(int)]), MAX_STRING_SIZE, argp);
         if (sz > 0) {
-            bpf_probe_read_cb(&(buf->args[offset]), sizeof(int), &sz);
+            bpf_probe_read_kernel(&(buf->args[offset]), sizeof(int), &sz);
             buf->offset += sz + sizeof(int);
             elem_num++;
             continue;
@@ -373,7 +373,7 @@ statfunc int __save_str_arr_to_buf(args_buffer_t *buf, const char *const *ptr, u
     // Read into buffer
     int sz = bpf_probe_read_str_cb(&(buf->args[offset + sizeof(int)]), sizeof(ellipsis), ellipsis);
     if (sz > 0) {
-        bpf_probe_read_cb(&(buf->args[offset]), sizeof(int), &sz);
+        bpf_probe_read_kernel(&(buf->args[offset]), sizeof(int), &sz);
         buf->offset += sz + sizeof(int);
         elem_num++;
     }
