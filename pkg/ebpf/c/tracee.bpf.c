@@ -3136,7 +3136,7 @@ statfunc u32 send_bin_helper(void *ctx, void *prog_array, int tail_call)
             // Handle the rest of write recursively
             bin_args->start_off += bin_args->full_size;
             struct iovec io_vec;
-            bpf_probe_read_kernel(&io_vec, sizeof(struct iovec), &bin_args->vec[bin_args->iov_idx]);
+            bpf_probe_read_user(&io_vec, sizeof(struct iovec), &bin_args->vec[bin_args->iov_idx]);
             bin_args->ptr = io_vec.iov_base;
             bin_args->full_size = io_vec.iov_len;
             bpf_tail_call(ctx, prog_array, tail_call);
@@ -3222,7 +3222,7 @@ statfunc u32 send_bin_helper(void *ctx, void *prog_array, int tail_call)
         // Handle the rest of write recursively
         bin_args->start_off += bin_args->full_size;
         struct iovec io_vec;
-        bpf_probe_read_kernel(&io_vec, sizeof(struct iovec), &bin_args->vec[bin_args->iov_idx]);
+        bpf_probe_read_user(&io_vec, sizeof(struct iovec), &bin_args->vec[bin_args->iov_idx]);
         bin_args->ptr = io_vec.iov_base;
         bin_args->full_size = io_vec.iov_len;
         bpf_tail_call(ctx, prog_array, tail_call);
