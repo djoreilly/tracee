@@ -436,7 +436,7 @@ statfunc int save_args_str_arr_to_buf(
         return 0;
 
     // Read into buffer
-    if (bpf_probe_read_kernel(&(buf->args[buf->offset + 9]), len & (MAX_ARR_LEN - 1), start) == 0) {
+    if (bpf_probe_read_user(&(buf->args[buf->offset + 9]), len & (MAX_ARR_LEN - 1), start) == 0) {
         // We update offset only if all writes were successful
         buf->offset += len + 9;
         buf->argnum++;
