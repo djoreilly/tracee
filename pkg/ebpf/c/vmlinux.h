@@ -1340,8 +1340,13 @@ const int TRACE_EVENT_FL_TRACEPOINT = (1 << TRACE_EVENT_FL_TRACEPOINT_BIT);
 //
 
 struct iphdr {
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     __u8 ihl : 4;
     __u8 version : 4;
+#else
+    __u8 version : 4;
+    __u8 ihl : 4;
+#endif
     __u8 tos;
     __be16 tot_len;
     __be16 id;
@@ -1354,8 +1359,13 @@ struct iphdr {
 };
 
 struct ipv6hdr {
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
     __u8 priority : 4;
     __u8 version : 4;
+#else
+    __u8 version : 4;
+    __u8 priority : 4;
+#endif
     __u8 flow_lbl[3];
     __be16 payload_len;
     __u8 nexthdr;
