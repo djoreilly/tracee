@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -2295,6 +2296,9 @@ func Test_EventFilters(t *testing.T) {
 	// run tests cases
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
+			if dmiRequiredAndMissing(tc) {
+				t.Skip("skipping test as it requires /sys/class/dmi but it is not present on the system")
+			}
 			// wait for the previous test to cool down
 			coolDown(t, tc.coolDown)
 
@@ -3155,4 +3159,26 @@ func ExpectAllInOrderSequentially(t *testing.T, cmdEvents []cmdEvents, actual *e
 	}
 
 	return nil
+}
+
+// dmiRequiredAndMissing returns true if the test case requires /sys/class/dmi
+// but the system does not have it, as is the case on s390x.
+func dmiRequiredAndMissing(tc testCase) bool {
+	dmiRequired := func() bool {
+		for _, cmdEvent := range tc.cmdEvents {
+			if strings.Contains(cmdEvent.runCmd, "/sys/class/dmi") {
+				return true
+			}
+		}
+		return false
+	}()
+
+	if !dmiRequired {
+		return false
+	}
+	_, err := os.Stat("/sys/class/dmi")
+	if err != nil {
+		return true
+	}
+	return false
 }
