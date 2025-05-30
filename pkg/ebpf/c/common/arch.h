@@ -81,7 +81,7 @@ statfunc int get_syscall_id_from_regs(struct pt_regs *regs)
 #elif defined(bpf_target_powerpc)
     int id = BPF_CORE_READ(regs, gpr[0]);
 #elif defined(bpf_target_s390)
-    int id = BPF_CORE_READ(regs, gprs[2]);
+    int id = BPF_CORE_READ(regs, gprs[1]);
 #endif
     return id;
 }
