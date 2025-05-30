@@ -2009,7 +2009,7 @@ func Test_EventFilters(t *testing.T) {
 								{
 									Event: "security_file_open",
 									Filters: []string{
-										"data.syscall_pathname=/sys/class/dmi/id*",
+										"data.syscall_pathname=/etc/os-release*",
 									},
 								},
 							},
@@ -2041,11 +2041,11 @@ func Test_EventFilters(t *testing.T) {
 			},
 			cmdEvents: []cmdEvents{
 				newCmdEvents(
-					"more /sys/class/dmi/id/bios_date",
+					"more /etc/os-release",
 					0,
 					1*time.Second,
 					[]trace.Event{
-						expectEvent(anyHost, "more", testutils.CPUForTests, anyPID, 0, events.SecurityFileOpen, orPolNames("sfo-pol-1"), orPolIDs(1), expectArg("syscall_pathname", "/sys/class/dmi/id/bios_date")),
+						expectEvent(anyHost, "more", testutils.CPUForTests, anyPID, 0, events.SecurityFileOpen, orPolNames("sfo-pol-1"), orPolIDs(1), expectArg("syscall_pathname", "/etc/os-release")),
 					},
 					[]string{},
 				),
@@ -2081,8 +2081,8 @@ func Test_EventFilters(t *testing.T) {
 								{
 									Event: "security_file_open",
 									Filters: []string{
-										"data.pathname=/sys/devices/virtual/dmi/id*",
-										"data.syscall_pathname=/sys/class/dmi/id*",
+										"data.pathname=/usr/share/zoneinfo/*",
+										"data.syscall_pathname=/etc/localtime*",
 									},
 								},
 							},
@@ -2114,11 +2114,11 @@ func Test_EventFilters(t *testing.T) {
 			},
 			cmdEvents: []cmdEvents{
 				newCmdEvents(
-					"more /sys/class/dmi/id/bios_date",
+					"more /etc/localtime",
 					0,
 					1*time.Second,
 					[]trace.Event{
-						expectEvent(anyHost, "more", testutils.CPUForTests, anyPID, 0, events.SecurityFileOpen, orPolNames("sfo-pol-1"), orPolIDs(1), expectArg("pathname", "/sys/devices/virtual/dmi/id/bios_date")),
+						expectEvent(anyHost, "more", testutils.CPUForTests, anyPID, 0, events.SecurityFileOpen, orPolNames("sfo-pol-1"), orPolIDs(1), expectArg("pathname", "/usr/share/zoneinfo/*")),
 					},
 					[]string{},
 				),
