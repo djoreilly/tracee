@@ -56,7 +56,8 @@ uint_filter_range_matches(u64 match_if_key_missing, void *filter_map, u64 value,
     u64 key_used_in_policies = 0;
 
     if (filter_map) {
-        eq_t *equality = bpf_map_lookup_elem(filter_map, &value);
+        u32 value_u32 = (u32)value;
+        eq_t *equality = bpf_map_lookup_elem(filter_map, &value_u32);
         if (equality != NULL) {
             equals_in_policies = equality->equals_in_policies;
             key_used_in_policies = equality->key_used_in_policies;
