@@ -326,7 +326,7 @@ func Test_EventFilters(t *testing.T) {
 					0,
 					1*time.Second,
 					[]trace.Event{
-						expectEvent(anyHost, "integration.tes", // note that comm name is from the go test binary that runs the command
+						expectEvent(anyHost, testutils.GoTestComm(), // note that comm name is from the go test binary that runs the command
 							testutils.CPUForTests, anyPID, 0, events.Execve, orPolNames("event-data"), orPolIDs(42), expectArg("pathname", "*ls")),
 					},
 					[]string{},
